@@ -1,0 +1,21 @@
+name: DynmapAdsPlugin
+version: ${project.version}
+main: net.inecat.dynmapads.DynmapAdsPlugin
+api-version: '1.21'
+description: Dynmap commercial facility and ads marker plugin with Discord approval
+author: inecat
+depend:
+  - Vault
+  - dynmap
+  - DiscordSRV
+
+commands:
+  mapmarker:
+    description: Manage commercial and advertisement markers on Dynmap
+    usage: /<command> <commercial|ads|delete> <args...>
+    aliases: [mm]
+
+permissions:
+  mapmarker.admin:
+    description: Allows managing other players' markers
+    default: op

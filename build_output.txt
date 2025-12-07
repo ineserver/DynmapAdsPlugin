@@ -1,0 +1,31 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< net.inecat:DynmapAdsPlugin >---------------------
+[INFO] Building DynmapAdsPlugin 1.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ DynmapAdsPlugin ---
+[INFO] Deleting C:\Users\ine00\Documents\GitHub\DynmapAdsPlugin\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ DynmapAdsPlugin ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ DynmapAdsPlugin ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 12 source files with javac [debug target 21] to target\classes
+[INFO] クラス・パスに1つ以上のプロセッサが見つかったため、注釈処理が有効化されて
+  います。少なくとも1つのプロセッサが名前(-processor)で指定されるか、検索パス
+  (--processor-path、--processor-module-path)が指定されるか、注釈処理が明示的に
+  有効化(-proc:only、-proc:full)されている場合を除き、将来のリリースのjavacでは
+  注釈処理が無効化される可能性があります。
+  -Xlint:オプションを使用すると、このメッセージを非表示にできます。
+  -proc:noneを使用すると、注釈処理を無効化できます。
+[INFO] /C:/Users/ine00/Documents/GitHub/DynmapAdsPlugin/src/main/java/net/inecat/dynmapads/config/ConfigManager.java: C:\Users\ine00\Documents\GitHub\DynmapAdsPlugin\src\main\java\net\inecat\dynmapads\config\ConfigManager.javaは推奨されないAPIを使用またはオーバーライドしています。
+[INFO] /C:/Users/ine00/Documents/GitHub/DynmapAdsPlugin/src/main/java/net/inecat/dynmapads/config/ConfigManager.java: 詳細は、-Xlint:deprecationオプションを指定して再コンパイルしてください。
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.207 s
+[INFO] Finished at: 2025-12-07T10:11:41+09:00
+[INFO] ------------------------------------------------------------------------

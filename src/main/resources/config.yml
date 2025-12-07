@@ -1,0 +1,38 @@
+# DynmapAdsPlugin Configuration
+
+discord:
+  # Channel ID for commercial facility approval requests
+  approval-channel-id: "YOUR_APPROVAL_CHANNEL_ID"
+  # Channel ID for advertisement notifications (fixed)
+  ads-channel-id: "786582642455478273"
+
+economy:
+  # Fee for creating a commercial facility marker
+  commercial-fee: 10000
+  # Fee per day for advertisement
+  ads-fee-per-day: 30000
+  # Currency unit name
+  currency-name: "ine"
+
+dynmap:
+  # Marker set ID for commercial facilities (lowercase)
+  commercial-marker-set: "commercial"
+  # Marker set ID for advertisements (lowercase)
+  ads-marker-set: "ads"
+
+messages:
+  prefix: "&8[&6DynmapAds&8] &r"
+  no-permission: "&c権限がありません。"
+  player-only: "&cこのコマンドはプレイヤーのみ実行可能です。"
+  shop-exists: "&cその店名は既に使用されています: &e%shop%"
+  shop-not-found: "&c店舗が見つかりません: &e%shop%"
+  not-owner: "&cあなたはこの店舗のオーナーではありません。"
+  insufficient-funds: "&c残高が不足しています。必要額: &e%amount% %currency%"
+  commercial-pending: "&a商業施設「&e%shop%&a」の申請を送信しました。Discord承認をお待ちください。"
+  commercial-approved: "&a商業施設「&e%shop%&a」が承認され、Dynmapに登録されました！"
+  ads-started: "&a広告「&e%shop%&a」を &e%days%日間 &a掲載開始しました！"
+  ads-expired: "&e広告「&6%shop%&e」の掲載期間が終了しました。"
+  shop-deleted: "&a店舗「&e%shop%&a」を削除しました。"
+  usage-commercial: "&c使用法: /mapmarker commercial <店名> <説明>"
+  usage-ads: "&c使用法: /mapmarker ads <店名> <期間(日)> [宣伝文句]"
+  usage-delete: "&c使用法: /mapmarker delete <店名>"
