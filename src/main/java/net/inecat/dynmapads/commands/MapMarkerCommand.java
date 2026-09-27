@@ -105,6 +105,9 @@ public class MapMarkerCommand implements CommandExecutor {
 
                     plugin.getServer().getScheduler().runTask(plugin, () -> {
                         player.sendMessage(config.formatMessage(config.getCommercialPending(), "%shop%", shopName));
+                        // NotQuests: お店クエストの「マーカー登録」を完了させる（該当の目標がない人には何も起きない）
+                        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                                "qa triggerObjective shop_marker " + player.getName());
                     });
                 })
                 .exceptionally(error -> {
