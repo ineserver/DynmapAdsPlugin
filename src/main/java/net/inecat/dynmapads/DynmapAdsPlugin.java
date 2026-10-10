@@ -55,6 +55,9 @@ public class DynmapAdsPlugin extends JavaPlugin {
             return;
         }
 
+        // Markers are non-persistent in Dynmap, so recreate them from markers.yml
+        dynmapManager.restoreMarkers();
+
         // Setup Discord (via DiscordSRV)
         discordManager = new DiscordManager(this);
         DiscordSRV.api.subscribe(this);
