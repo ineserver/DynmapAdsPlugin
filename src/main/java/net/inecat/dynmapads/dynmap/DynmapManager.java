@@ -4,10 +4,16 @@ import net.inecat.dynmapads.DynmapAdsPlugin;
 import net.inecat.dynmapads.data.MarkerData;
 import net.inecat.dynmapads.data.MarkerStatus;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.dynmap.DynmapAPI;
 import org.dynmap.markers.Marker;
 import org.dynmap.markers.MarkerAPI;
 import org.dynmap.markers.MarkerSet;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HexFormat;
+import java.util.List;
 
 /**
  * Manages Dynmap marker operations.
@@ -72,6 +78,41 @@ public class DynmapManager {
 
         plugin.getLogger().info("Dynmap marker sets initialized.");
         return true;
+    }
+
+    /**
+     * Recreate all approved markers from storage.
+     * Markers are non-persistent, so Dynmap forgets them on every server restart.
+     */
+    public void restoreMarkers() {
+        // Clear leftovers (e.g. plugin reloaded without restarting Dynmap)
+        for (Marker marker : new ArrayList<>(commercialSet.getMarkers())) {
+            marker.deleteMarker();
+        }
+        for (Marker marker : new ArrayList<>(adsSet.getMarkers())) {
+            marker.deleteMarker();
+        }
+
+        List<MarkerData> approved = new ArrayList<>(plugin.getMarkerStorage().getByStatus(MarkerStatus.COMMERCIAL));
+        approved.addAll(plugin.getMarkerStorage().getByStatus(MarkerStatus.ADS));
+
+        int restored = 0;
+        for (MarkerData data : approved) {
+            OfflinePlayer owner = Bukkit.getOfflinePlayer(data.getOwnerUUID());
+            String ownerName = owner.getName() != null ? owner.getName() : "Unknown";
+
+            boolean created = data.getStatus() == MarkerStatus.ADS
+                    ? createAdsMarker(data, ownerName)
+                    : createCommercialMarker(data, ownerName);
+
+            if (created) {
+                restored++;
+            } else {
+                plugin.getLogger().warning("Failed to restore marker: " + data.getShopName());
+            }
+        }
+
+        plugin.getLogger().info("Restored " + restored + "/" + approved.size() + " markers on Dynmap.");
     }
 
     /**
@@ -225,11 +266,10 @@ public class DynmapManager {
     }
 
     /**
-     * Sanitize shop name for use as marker ID.
+     * Convert shop name to a unique marker ID.
+     * Hex-encoded so that non-ASCII names (e.g. Japanese) don't collide.
      */
     private String sanitizeMarkerId(String shopName) {
-        return shopName.toLowerCase()
-                .replaceAll("[^a-z0-9_-]", "_")
-                .replaceAll("_+", "_");
+        return "shop_" + HexFormat.of().formatHex(shopName.getBytes(StandardCharsets.UTF_8));
     }
 }
