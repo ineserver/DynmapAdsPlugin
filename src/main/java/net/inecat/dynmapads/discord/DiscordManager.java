@@ -2,7 +2,9 @@ package net.inecat.dynmapads.discord;
 
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
+import github.scarsz.discordsrv.dependencies.jda.api.Permission;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import github.scarsz.discordsrv.dependencies.jda.api.requests.restaction.MessageAction;
 import github.scarsz.discordsrv.util.DiscordUtil;
 import net.inecat.dynmapads.DynmapAdsPlugin;
 import net.inecat.dynmapads.data.MarkerData;
@@ -102,30 +104,68 @@ public class DiscordManager {
             return future;
         }
 
-        EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("🏪 商業施設申請")
-                .setColor(Color.ORANGE)
-                .addField("店名", data.getShopName(), true)
-                .addField("申請者", playerName, true)
-                .addField("説明", data.getDescription(), false)
-                .addField("座標", String.format("%s: %.0f, %.0f, %.0f",
-                        data.getWorld(), data.getX(), data.getY(), data.getZ()), false)
-                .setFooter("✅ 承認 / ❌ 却下");
+        String coords = String.format("%s: %.0f, %.0f, %.0f",
+                data.getWorld(), data.getX(), data.getY(), data.getZ());
 
-        channel.sendMessageEmbeds(embed.build()).queue(
-                message -> {
-                    // Add approval reaction
-                    message.addReaction("✅").queue();
-                    // Add rejection reaction
-                    message.addReaction("❌").queue();
-                    future.complete(message.getId());
-                },
-                error -> {
-                    plugin.getLogger().severe("Failed to send message: " + error.getMessage());
-                    future.completeExceptionally(error);
-                });
+        MessageAction action;
+        if (canEmbed(channel)) {
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("🏪 商業施設申請")
+                    .setColor(Color.ORANGE)
+                    .addField("店名", data.getShopName(), true)
+                    .addField("申請者", playerName, true)
+                    .addField("説明", data.getDescription(), false)
+                    .addField("座標", coords, false)
+                    .setFooter("✅ 承認 / ❌ 却下");
+            action = channel.sendMessageEmbeds(embed.build());
+        } else {
+            // Fall back to plain text when the bot lacks Embed Links in this channel
+            action = channel.sendMessage("🏪 **商業施設申請**\n\n"
+                    + "**店名:** " + data.getShopName() + "\n"
+                    + "**申請者:** " + playerName + "\n"
+                    + "**説明:** " + data.getDescription() + "\n"
+                    + "**座標:** " + coords + "\n\n"
+                    + "✅ 承認 / ❌ 却下");
+        }
+
+        // JDA checks permissions when queue() is called and throws synchronously,
+        // so catch here to make sure the caller's refund handler runs
+        try {
+            action.queue(
+                    message -> {
+                        future.complete(message.getId());
+                        try {
+                            // Add approval reaction
+                            message.addReaction("✅").queue();
+                            // Add rejection reaction
+                            message.addReaction("❌").queue();
+                        } catch (Exception e) {
+                            plugin.getLogger().warning("Failed to add reactions to approval message: " + e.getMessage());
+                        }
+                    },
+                    error -> {
+                        plugin.getLogger().severe("Failed to send message: " + error.getMessage());
+                        future.completeExceptionally(error);
+                    });
+        } catch (Exception e) {
+            plugin.getLogger().severe("Failed to send approval request: " + e.getMessage());
+            future.completeExceptionally(e);
+        }
 
         return future;
+    }
+
+    /**
+     * Check if the bot can send embeds in the channel.
+     * Logs a warning when the Embed Links permission is missing.
+     */
+    private boolean canEmbed(TextChannel channel) {
+        if (channel.getGuild().getSelfMember().hasPermission(channel, Permission.MESSAGE_EMBED_LINKS)) {
+            return true;
+        }
+        plugin.getLogger().warning("Bot lacks 'Embed Links' permission in #" + channel.getName()
+                + " - sending plain text instead. Grant the permission to restore embeds.");
+        return false;
     }
 
     /**
@@ -225,12 +265,19 @@ public class DiscordManager {
             return;
         }
 
-        EmbedBuilder embed = new EmbedBuilder()
-                .setTitle("📋 " + action + ": " + shopName)
-                .setColor(color)
-                .setDescription(details)
-                .setTimestamp(java.time.Instant.now());
-
-        channel.sendMessageEmbeds(embed.build()).queue();
+        try {
+            if (canEmbed(channel)) {
+                EmbedBuilder embed = new EmbedBuilder()
+                        .setTitle("📋 " + action + ": " + shopName)
+                        .setColor(color)
+                        .setDescription(details)
+                        .setTimestamp(java.time.Instant.now());
+                channel.sendMessageEmbeds(embed.build()).queue();
+            } else {
+                channel.sendMessage("📋 **" + action + ": " + shopName + "**\n" + details).queue();
+            }
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to send history message: " + e.getMessage());
+        }
     }
 }
